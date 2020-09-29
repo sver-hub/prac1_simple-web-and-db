@@ -6,6 +6,8 @@ const app = express()
 
 app.use(parser.urlencoded({extended: true}))
 app.use(parser.json({}))
+app.use(express.static('styles'))
+app.set('view engine', 'pug')
 
 
 const config = {

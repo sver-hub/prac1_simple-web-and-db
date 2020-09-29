@@ -1,0 +1,17 @@
+html
+    head
+        title= 'sver8am'
+        link(rel='stylesheet' href='/style.css')
+    body
+        nav
+            a(href="/") Home
+            a(href="/users") Users
+        div(class='wrapper')
+            form(action="/by-id" autocomplete='off')
+                div(class='form-wrapper')
+                    input(type='text' name='id' placeholder='id')
+                    button(type='submit') Query by id
+            form(action="/by-login" autocomplete='off')
+                div(class='form-wrapper')
+                    input(type='text' name='login' placeholder='login')
+                    button(type='submit') Query by login

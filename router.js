@@ -4,10 +4,10 @@ const router = Router()
 
 module.exports = router
 
-const makeUsersTable = (users) => {
-    let table = '<table border="1"><caption>Users</caption><tr><th>id</th><th>login</th><th>money amount</th><th>card number</th></tr>'
+const makeUsersTable = (users, caption) => {
+    let table = `<table><caption>${caption}</caption><thead><tr><th>id</th><th>login</th></tr></thead>`
     users.forEach(user => {
-        table += `<tr><th>${user.id}</th><th>${user.login}</th><th>${user.money_amount}</th><th>${user.card_number}</th></tr>`
+        table += `<tr><th>${user.id}</th><th>${user.login}</th>`
     })
     table += '</table>'
     return table
@@ -20,16 +20,22 @@ router.get(/^\/by-*/, async (req, res) => {
     let queryResult
 
     if (method === '/by-login' && num === 1 && req.query.login) {
-        queryResult = await User.findAll({where: {login: req.query.login}})
+        queryResult = await User.findAll({
+            attributes: ['id', 'login'],
+            where: {login: req.query.login}
+        })
     } else if (method === '/by-id' && num === 1 && req.query.id) {
-        queryResult = await User.findAll({where: {id: req.query.id}})
-    } else res.send('<span>Invalid request</span>')
+        queryResult = await User.findAll({
+            attributes: ['id', 'login'],
+            where: {id: req.query.id}
+        })
+    } else res.render('error', {error: 'Invalid request'})
 
     try {
         if (queryResult.length !== 0) {
-            const table = makeUsersTable(queryResult)
-            res.send(table)
-        } else res.send('<span>No such user</span>')
+            const table = makeUsersTable(queryResult, 'Query result')
+            res.render('table', {table})
+        } else res.render('error', {error: 'No such user'})
     } catch (e) {
     }
 
@@ -38,31 +44,22 @@ router.get(/^\/by-*/, async (req, res) => {
 
 router.get('/users', async (req, res, next) => {
     try {
-        let users = await User.findAll({where: {status: 1}})
+        let users = await User.findAll({
+            attributes: ['id', 'login'],
+            where: {status: 1}
+        })
         res.set('Content-Type', 'text/html')
-        const table = makeUsersTable(users)
-        res.send(table)
+        const table = makeUsersTable(users, 'Users')
+        res.render('table', {table})
     } catch (e) {
         next(e)
     }
 })
 
-const byId = () => {
-    console.log(document.getElementById('id').value)
-}
 
 router.get('/', (req, res) => {
     res.set('Content-Type', 'text/html')
-    let pageHtml = '<a href="http://localhost:3000/users">Users</a>'
-    pageHtml += '<form action="http://localhost:3000/by-id"><div>' +
-        '<span>id</span><input type="text" name="id"/>' +
-        '<button type="submit">Query by id</button>' +
-        '</div></form>' +
-        '<form action="http://localhost:3000/by-login"><div>' +
-        '<span>login</span><input type="text" name="login"/>' +
-        '<button type="submit">Query by login</button>' +
-        '</div></form>'
-    res.send(pageHtml)
+    res.render('main')
 })
 
 
